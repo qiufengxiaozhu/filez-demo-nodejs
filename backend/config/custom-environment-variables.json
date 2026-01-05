@@ -1,0 +1,38 @@
+{
+  "server": {
+    "port": "PORT",
+    "env": "NODE_ENV"
+  },
+  "database": {
+    "url": "DATABASE_URL"
+  },
+  "jwt": {
+    "secret": "JWT_SECRET",
+    "expiresIn": "JWT_EXPIRES_IN"
+  },
+  "session": {
+    "secret": "SESSION_SECRET",
+    "maxAge": "SESSION_MAX_AGE",
+    "key": "SESSION_KEY"
+  },
+  "upload": {
+    "dir": "UPLOAD_DIR",
+    "maxFileSize": "MAX_FILE_SIZE"
+  },
+  "filez": {
+    "host": "FILEZ_HOST",
+    "port": "FILEZ_PORT",
+    "repoId": "FILEZ_REPO_ID",
+    "context": "FILEZ_CONTEXT"
+  },
+  "demo": {
+    "host": "DEMO_HOST",
+    "port": "DEMO_PORT",
+    "tokenName": "TOKEN_NAME"
+  },
+  "admin": {
+    "username": "ADMIN_USERNAME",
+    "password": "ADMIN_PASSWORD",
+    "email": "ADMIN_EMAIL"
+  }
+}
