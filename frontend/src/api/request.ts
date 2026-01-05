@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { ElMessage } from 'element-plus';
 
 // 创建 axios 实例
@@ -40,7 +40,8 @@ request.interceptors.response.use(
       return Promise.reject(new Error(data.message || '请求失败'));
     }
 
-    return data;
+    // 返回 data.data，这是实际的业务数据
+    return data.data;
   },
   (error) => {
     console.error('响应错误:', error);
