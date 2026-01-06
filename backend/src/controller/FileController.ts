@@ -1,5 +1,6 @@
 import { Context } from 'koa';
 import * as docService from '../service/docService';
+import * as templateService from '../service/templateService';
 import { success, error, notFound, forbidden } from '../util/response';
 import { logger } from '../util/logger';
 import * as path from 'path';
@@ -254,6 +255,12 @@ export async function newFile(ctx: Context): Promise<void> {
     return;
   }
 
+  // 检查是否支持该文档类型
+  if (!templateService.isSupportedType(docType)) {
+    error(ctx, `不支持的文档类型: ${docType}，支持的类型: ${templateService.getSupportedTypes().join(', ')}`);
+    return;
+  }
+
   const timestamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0];
   const name = `${timestamp}-${filename || 'new'}.${docType}`;
 
@@ -264,19 +271,26 @@ export async function newFile(ctx: Context): Promise<void> {
     return;
   }
 
+  // 获取模板内容
+  const templateBuffer = templateService.getTemplate(docType);
+  if (!templateBuffer) {
+    error(ctx, '获取模板文件失败');
+    return;
+  }
+
   // 创建文档元数据
   const docMeta = await docService.createDocMeta({
     name,
     extension: docType,
+    mimeType: templateService.getMimeType(docType),
     createdById: userId,
     ownerId: userId,
   });
 
-  // TODO: 从模板文件创建新文件
-  // 这里暂时创建一个空文件
-  await docService.uploadFile(docMeta.id, Buffer.from(''), 0);
+  // 使用模板内容创建文件
+  await docService.uploadFile(docMeta.id, templateBuffer, templateBuffer.length);
 
-  logger.info(`新建文件成功: ${name}, docId: ${docMeta.id}`);
+  logger.info(`新建文件成功: ${name}, docId: ${docMeta.id}, size: ${templateBuffer.length}`);
   success(ctx, docMeta, '创建成功');
 }
 
