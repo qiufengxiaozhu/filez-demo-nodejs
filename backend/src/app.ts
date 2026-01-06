@@ -1,8 +1,11 @@
 import 'reflect-metadata';
+import * as path from 'path';
+import * as fs from 'fs';
 import Koa from 'koa';
 import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
 import session from 'koa-session';
+import serve from 'koa-static';
 import { appConfig as config } from './config/AppConfig';
 import { closeDatabase, initializeDatabase } from './database/DataSource';
 import { logger } from './util/logger';
@@ -45,9 +48,33 @@ app.use(bodyParser({
 }));
 app.use(session(sessionConfig, app));
 
-// 注册路由
+// 注册 API 路由
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+// 静态文件服务（生产环境托管前端）
+// Docker 中 public 目录在 /app/public，开发环境在项目根目录
+const publicDir = process.env.NODE_ENV === 'production'
+  ? path.join(process.cwd(), 'public')
+  : path.join(__dirname, '../../public');
+
+if (fs.existsSync(publicDir)) {
+  app.use(serve(publicDir));
+  logger.info(`📦 静态文件目录: ${publicDir}`);
+  
+  // SPA 回退：非 API 路由返回 index.html
+  app.use(async (ctx, next) => {
+    if (!ctx.path.startsWith('/api') && !ctx.path.startsWith('/v2') && !ctx.path.startsWith('/health')) {
+      const indexPath = path.join(publicDir, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        ctx.type = 'html';
+        ctx.body = fs.createReadStream(indexPath);
+        return;
+      }
+    }
+    await next();
+  });
+}
 
 // 错误事件监听
 app.on('error', (err) => {

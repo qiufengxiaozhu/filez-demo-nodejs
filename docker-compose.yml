@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  filez-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: filez-demo
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-8000}
+    volumes:
+      - filez-data:/app/data
+      - filez-uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  filez-data:
+  filez-uploads:
+
