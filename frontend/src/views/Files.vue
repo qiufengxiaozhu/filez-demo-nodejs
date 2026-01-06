@@ -156,6 +156,26 @@
       description="暂无文件，请上传文件"
     />
 
+    <!-- iframe 预览/编辑弹窗 -->
+    <el-dialog
+      v-model="iframeDialogVisible"
+      :title="iframeTitle"
+      width="90%"
+      top="5vh"
+      :close-on-click-modal="false"
+      :before-close="closeIframeDialog"
+      class="iframe-dialog"
+    >
+      <div v-loading="iframeLoading" class="iframe-container">
+        <iframe
+          v-if="iframeUrl"
+          :src="iframeUrl"
+          frameborder="0"
+          class="doc-iframe"
+        ></iframe>
+      </div>
+    </el-dialog>
+
     <!-- 编辑元数据对话框 -->
     <el-dialog
       v-model="metaDialogVisible"
@@ -292,7 +312,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, reactive } from 'vue';
 import { useFileStore } from '@/store/file';
-import { batchDeleteFiles, deleteFile, type DocMeta, downloadFile, newFile, updateDocMeta, getDocControl, updateDocControl } from '@/api/file';
+import { batchDeleteFiles, deleteFile, type DocMeta, downloadFile, newFile, updateDocMeta, getDocControl, updateDocControl, getZOfficeUrl } from '@/api/file';
 import { config } from '@/config';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ArrowDown, Delete, Document, Download, Edit, More, Plus, Refresh, Setting, Upload, View } from '@element-plus/icons-vue';
@@ -301,6 +321,12 @@ import { ArrowDown, Delete, Document, Download, Edit, More, Plus, Refresh, Setti
 const metaDialogVisible = ref(false);
 const metaFormLoading = ref(false);
 const currentEditDoc = ref<DocMeta | null>(null);
+
+// iframe 预览/编辑弹窗
+const iframeDialogVisible = ref(false);
+const iframeUrl = ref('');
+const iframeTitle = ref('');
+const iframeLoading = ref(false);
 
 // 文档元数据表单
 const metaForm = reactive({
@@ -384,14 +410,30 @@ const handleSelectionChange = (selection: DocMeta[]) => {
   fileStore.selectedFiles = selection.map(item => item.id);
 };
 
-const handleView = (_row: DocMeta) => {
-  ElMessage.info('预览功能开发中...');
-  // TODO: 实现预览功能
+const handleView = async (row: DocMeta) => {
+  try {
+    const url = await getZOfficeUrl(row.id, 'view', false);
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      ElMessage.error('获取预览地址失败');
+    }
+  } catch (error) {
+    ElMessage.error('获取预览地址失败');
+  }
 };
 
-const handleEdit = (_row: DocMeta) => {
-  ElMessage.info('编辑功能开发中...');
-  // TODO: 实现编辑功能（新窗口打开）
+const handleEdit = async (row: DocMeta) => {
+  try {
+    const url = await getZOfficeUrl(row.id, 'edit', false);
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      ElMessage.error('获取编辑地址失败');
+    }
+  } catch (error) {
+    ElMessage.error('获取编辑地址失败');
+  }
 };
 
 const handleMoreCommand = (command: string, row: DocMeta) => {
@@ -408,14 +450,54 @@ const handleMoreCommand = (command: string, row: DocMeta) => {
   }
 };
 
-const handleViewInFrame = (_row: DocMeta) => {
-  ElMessage.info('当前窗口预览功能开发中...');
-  // TODO: 实现当前窗口内预览
+const handleViewInFrame = async (row: DocMeta) => {
+  iframeLoading.value = true;
+  iframeTitle.value = `预览 - ${row.name}`;
+  iframeDialogVisible.value = true;
+  
+  try {
+    const url = await getZOfficeUrl(row.id, 'view', true);
+    if (url) {
+      iframeUrl.value = url;
+    } else {
+      ElMessage.error('获取预览地址失败');
+      iframeDialogVisible.value = false;
+    }
+  } catch (error) {
+    ElMessage.error('获取预览地址失败');
+    iframeDialogVisible.value = false;
+  } finally {
+    iframeLoading.value = false;
+  }
 };
 
-const handleEditInFrame = (_row: DocMeta) => {
-  ElMessage.info('当前窗口编辑功能开发中...');
-  // TODO: 实现当前窗口内编辑
+const handleEditInFrame = async (row: DocMeta) => {
+  iframeLoading.value = true;
+  iframeTitle.value = `编辑 - ${row.name}`;
+  iframeDialogVisible.value = true;
+  
+  try {
+    const url = await getZOfficeUrl(row.id, 'edit', true);
+    if (url) {
+      iframeUrl.value = url;
+    } else {
+      ElMessage.error('获取编辑地址失败');
+      iframeDialogVisible.value = false;
+    }
+  } catch (error) {
+    ElMessage.error('获取编辑地址失败');
+    iframeDialogVisible.value = false;
+  } finally {
+    iframeLoading.value = false;
+  }
+};
+
+const closeIframeDialog = () => {
+  iframeDialogVisible.value = false;
+  iframeUrl.value = '';
+  iframeTitle.value = '';
+  // 关闭后刷新列表，以获取可能的更新
+  refreshList();
 };
 
 const handleEditMeta = async (row: DocMeta) => {
@@ -677,6 +759,19 @@ const formatDate = (date: string): string => {
 
 .meta-dialog .el-input {
   width: 100%;
+}
+
+/* iframe 弹窗样式 */
+.iframe-dialog .iframe-container {
+  width: 100%;
+  height: 80vh;
+  min-height: 500px;
+}
+
+.iframe-dialog .doc-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 </style>
 

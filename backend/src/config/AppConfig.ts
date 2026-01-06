@@ -26,16 +26,24 @@ export interface UploadConfig {
   maxFileSize: number;
 }
 
-export interface FilezConfig {
+export interface ZOfficeConfig {
+  schema: string;
   host: string;
   port: number;
-  repoId: string;
   context: string;
+  cors: boolean;
+  app: {
+    secret: string;
+    feIntegration: {
+      enable: boolean;
+    };
+  };
 }
 
 export interface DemoConfig {
   host: string;
-  port: number;
+  context: string;
+  repoId: string;
   tokenName: string;
 }
 
@@ -51,7 +59,7 @@ export interface AppConfig {
   jwt: JwtConfig;
   session: SessionConfig;
   upload: UploadConfig;
-  filez: FilezConfig;
+  zoffice: ZOfficeConfig;
   demo: DemoConfig;
   admin: AdminConfig;
 }
@@ -63,11 +71,10 @@ export const appConfig: AppConfig = {
   jwt: config.get('jwt'),
   session: config.get('session'),
   upload: config.get('upload'),
-  filez: config.get('filez'),
+  zoffice: config.get('zoffice'),
   demo: config.get('demo'),
   admin: config.get('admin'),
 };
 
 // 兼容旧的导出方式
 export { appConfig as config };
-

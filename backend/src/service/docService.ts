@@ -192,3 +192,26 @@ export async function checkAccess(userId: string, docId: string): Promise<boolea
   return false;
 }
 
+/**
+ * 创建新文件（用于另存为功能）
+ */
+export async function makeNewFile(name: string, parentPath: string): Promise<DocMeta | null> {
+  // 检查文件名是否已存在
+  const existing = await findByName(name);
+  if (existing) {
+    return null;
+  }
+
+  // 解析文件扩展名
+  const ext = path.extname(name).slice(1).toLowerCase() || 'bin';
+  
+  // 创建文档元数据
+  const docMeta = await createDocMeta({
+    name,
+    path: parentPath,
+    extension: ext,
+  });
+
+  return docMeta;
+}
+

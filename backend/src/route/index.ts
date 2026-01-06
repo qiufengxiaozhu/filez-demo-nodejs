@@ -3,6 +3,7 @@ import authRoute from './authRoute';
 import fileRoute from './fileRoute';
 import docRoute from './docRoute';
 import userRoute from './userRoute';
+import zofficeRoute from './zofficeRoute';
 
 const router = new Router();
 
@@ -19,6 +20,9 @@ router.use(authRoute.routes(), authRoute.allowedMethods());
 router.use(fileRoute.routes(), fileRoute.allowedMethods());
 router.use(docRoute.routes(), docRoute.allowedMethods());
 router.use(userRoute.routes(), userRoute.allowedMethods());
+
+// ZOffice 集成路由 (路径: /v2/context/*)
+router.use(zofficeRoute.routes(), zofficeRoute.allowedMethods());
 
 export default router;
 

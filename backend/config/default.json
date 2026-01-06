@@ -19,15 +19,23 @@
     "dir": "./uploads",
     "maxFileSize": 524288000
   },
-  "filez": {
+  "zoffice": {
+    "schema": "http",
     "host": "172.16.34.165",
     "port": 8001,
-    "repoId": "3rd-party",
-    "context": "/v2/context"
+    "context": "/docs/app/driver-callback",
+    "cors": true,
+    "app": {
+      "secret": "default-salt",
+      "feIntegration": {
+        "enable": true
+      }
+    }
   },
   "demo": {
-    "host": "localhost",
-    "port": 8000,
+    "host": "172.16.34.165",
+    "context": "/v2/context",
+    "repoId": "3rd-party",
     "tokenName": "zdocs_access_token"
   },
   "admin": {
@@ -36,4 +44,3 @@
     "email": "admin@lenovo_zOffice.com"
   }
 }
-

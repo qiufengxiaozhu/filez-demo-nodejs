@@ -155,3 +155,15 @@ export function updateDocControl(docId: string, data: UpdateDocControlParams) {
   return request.put<any, DocControl>(`/api/doc/${docId}/control`, data);
 }
 
+/**
+ * 获取 ZOffice 集成 URL（用于预览/编辑）
+ * @param docId 文档ID
+ * @param action 操作类型: view | edit
+ * @param isInFrame 是否在 iframe 中打开
+ */
+export function getZOfficeUrl(docId: string, action: 'view' | 'edit' = 'view', isInFrame: boolean = false) {
+  return request.get<any, string>('/v2/context/driver-cb', {
+    params: { docId, action, isInFrame },
+  });
+}
+
