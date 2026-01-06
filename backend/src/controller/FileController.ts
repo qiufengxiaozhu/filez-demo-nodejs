@@ -272,7 +272,7 @@ export async function newFile(ctx: Context): Promise<void> {
   }
 
   // 获取模板内容
-  const templateBuffer = templateService.getTemplate(docType);
+  const { buffer: templateBuffer, mimeType } = templateService.getTemplate(docType);
   if (!templateBuffer) {
     error(ctx, '获取模板文件失败');
     return;
@@ -282,7 +282,7 @@ export async function newFile(ctx: Context): Promise<void> {
   const docMeta = await docService.createDocMeta({
     name,
     extension: docType,
-    mimeType: templateService.getMimeType(docType),
+    mimeType,
     createdById: userId,
     ownerId: userId,
   });
