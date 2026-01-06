@@ -127,25 +127,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useFileStore } from '@/store/file';
-import { uploadFile, downloadFile, deleteFile, batchDeleteFiles, newFile, type DocMeta } from '@/api/file';
+import { batchDeleteFiles, deleteFile, type DocMeta, downloadFile, newFile } from '@/api/file';
+import { config } from '@/config';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import {
-  Upload,
-  Plus,
-  Delete,
-  Refresh,
-  View,
-  Download,
-  Document,
-  ArrowDown,
-} from '@element-plus/icons-vue';
+import { ArrowDown, Delete, Document, Download, Plus, Refresh, Upload, View, } from '@element-plus/icons-vue';
 
 const fileStore = useFileStore();
 
 const uploadAction = computed(() => {
-  return `${import.meta.env.VITE_API_BASE_URL}/api/file/upload`;
+  return `${config.apiBaseURL}/api/file/upload`;
 });
 
 const uploadHeaders = computed(() => {
@@ -189,7 +181,7 @@ const handleNewFile = async (docType: string) => {
   try {
     await newFile(docType);
     ElMessage.success('新建文档成功');
-    refreshList();
+    await refreshList();
   } catch (error) {
     ElMessage.error('新建文档失败');
   }
@@ -199,7 +191,7 @@ const handleSelectionChange = (selection: DocMeta[]) => {
   fileStore.selectedFiles = selection.map(item => item.id);
 };
 
-const handleView = (row: DocMeta) => {
+const handleView = (_row: DocMeta) => {
   ElMessage.info('预览功能开发中...');
   // TODO: 实现预览功能
 };
@@ -238,7 +230,7 @@ const handleDelete = async (row: DocMeta) => {
 
     await deleteFile(row.id);
     ElMessage.success('删除成功');
-    refreshList();
+    await refreshList();
   } catch (error: any) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败');
@@ -266,7 +258,7 @@ const handleBatchDelete = async () => {
     await batchDeleteFiles(fileStore.selectedFiles);
     ElMessage.success('批量删除成功');
     fileStore.clearSelection();
-    refreshList();
+    await refreshList();
   } catch (error: any) {
     if (error !== 'cancel') {
       ElMessage.error('批量删除失败');

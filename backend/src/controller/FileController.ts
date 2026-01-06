@@ -5,6 +5,18 @@ import { logger } from '../util/logger';
 import * as path from 'path';
 
 /**
+ * 解码文件名（处理中文乱码）
+ */
+function decodeFileName(name: string): string {
+  try {
+    // multer 使用 Latin1 编码，需要转换为 UTF-8
+    return Buffer.from(name, 'latin1').toString('utf8');
+  } catch {
+    return name;
+  }
+}
+
+/**
  * 上传文件
  */
 export async function upload(ctx: Context): Promise<void> {
@@ -21,7 +33,8 @@ export async function upload(ctx: Context): Promise<void> {
     return;
   }
 
-  const { originalname, buffer, size, mimetype } = file;
+  const { originalname: rawName, buffer, size, mimetype } = file;
+  const originalname = decodeFileName(rawName);
   const extension = path.extname(originalname).substring(1);
 
   // 检查文件是否已存在
@@ -68,7 +81,8 @@ export async function batchUpload(ctx: Context): Promise<void> {
 
   for (const file of files) {
     try {
-      const { originalname, buffer, size, mimetype } = file;
+      const { originalname: rawName, buffer, size, mimetype } = file;
+      const originalname = decodeFileName(rawName);
       const extension = path.extname(originalname).substring(1);
 
       // 检查文件是否已存在
@@ -93,7 +107,7 @@ export async function batchUpload(ctx: Context): Promise<void> {
       results.push(`上传 ${originalname} 成功`);
       logger.info(`文件上传成功: ${originalname}, docId: ${docMeta.id}`);
     } catch (err: any) {
-      results.push(`上传 ${file.originalname} 失败: ${err.message}`);
+      results.push(`上传 ${decodeFileName(file.originalname)} 失败: ${err.message}`);
       logger.error(`文件上传失败: ${file.originalname}`, err);
     }
   }

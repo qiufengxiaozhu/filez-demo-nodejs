@@ -1,9 +1,10 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { ElMessage } from 'element-plus';
+import { config } from '@/config';
 
 // 创建 axios 实例
 const request: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  baseURL: config.apiBaseURL,
   timeout: 30000,
   withCredentials: true, // 允许携带 cookie
 });

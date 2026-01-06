@@ -6,19 +6,9 @@
 
 ```bash
 npm install
-# 或
-pnpm install
 ```
 
-### 2. 配置环境变量
-
-创建 `.env.development` 文件（已提供默认配置）：
-
-```env
-VITE_API_BASE_URL=http://localhost:3000
-```
-
-### 3. 启动开发服务器
+### 2. 启动开发服务器
 
 ```bash
 npm run dev
@@ -31,20 +21,26 @@ npm run dev
 - 用户名: `admin`
 - 密码: `zOffice`
 
+## 环境变量
+
+项目根目录的 `.env` 文件：
+
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
 ## 项目结构
 
 ```
-frontend/
-├── src/
-│   ├── api/             # API 接口
-│   ├── components/      # 通用组件
-│   ├── router/          # 路由配置
-│   ├── store/           # Pinia 状态管理
-│   ├── views/           # 页面组件
-│   ├── App.vue          # 根组件
-│   └── main.ts          # 应用入口
-├── public/              # 静态资源
-└── index.html           # HTML 模板
+src/
+├── api/             # API 接口
+├── config/          # 配置
+├── router/          # 路由配置
+├── store/           # Pinia 状态管理
+├── utils/           # 工具函数
+├── views/           # 页面组件
+├── App.vue          # 根组件
+└── main.ts          # 应用入口
 ```
 
 ## 功能特性
@@ -58,23 +54,13 @@ frontend/
 - ✅ 用户信息管理
 - ✅ 密码修改
 
-## 生产环境部署
+## 生产部署
 
-### 1. 构建项目
+### 构建
 
 ```bash
 npm run build
 ```
-
-### 2. 部署
-
-构建产物在 `dist` 目录，可以部署到任何静态服务器：
-
-- Nginx
-- Apache
-- Vercel
-- Netlify
-- 等等
 
 ### Nginx 配置示例
 
@@ -91,10 +77,9 @@ server {
     }
     
     location /api {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 }
 ```
-

@@ -9,10 +9,10 @@ build/
 */build/
 
 # Environment variables
-.env
+#.env
 .env.local
 .env.*.local
-*/.env
+#*/.env
 */.env.local
 
 # Logs
