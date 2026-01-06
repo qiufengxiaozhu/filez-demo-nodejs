@@ -1,11 +1,12 @@
 version: '3.8'
 
 services:
-  filez-demo:
+  filez-demo-nodejs:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: filez-demo
+    image: filez-demo-nodejs
+    container_name: filez-demo-nodejs
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
     environment:
