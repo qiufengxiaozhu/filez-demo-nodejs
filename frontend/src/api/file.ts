@@ -92,3 +92,66 @@ export function getFileList() {
   return request.get<any, DocMeta[]>('/api/file/list');
 }
 
+/**
+ * 更新文档元数据
+ */
+export interface UpdateDocMetaParams {
+  name?: string;
+  path?: string;
+}
+
+export function updateDocMeta(docId: string, data: UpdateDocMetaParams) {
+  return request.put<any, DocMeta>(`/api/doc/${docId}/meta`, data);
+}
+
+/**
+ * 文档控制配置
+ */
+export interface DocControl {
+  id: string;
+  userId: string;
+  docId: string;
+  // 权限控制
+  canEdit: boolean;
+  canDownload: boolean;
+  canPrint: boolean;
+  canCopy: boolean;
+  canComment: boolean;
+  canShare: boolean;
+  // 水印配置
+  watermarkEnabled: boolean;
+  watermarkText?: string;
+  watermarkType?: string;
+  // 扩展配置
+  extensions?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 获取文档控制配置
+ */
+export function getDocControl(docId: string) {
+  return request.get<any, DocControl>(`/api/doc/${docId}/control`);
+}
+
+/**
+ * 更新文档控制配置
+ */
+export interface UpdateDocControlParams {
+  canEdit?: boolean;
+  canDownload?: boolean;
+  canPrint?: boolean;
+  canCopy?: boolean;
+  canComment?: boolean;
+  canShare?: boolean;
+  watermarkEnabled?: boolean;
+  watermarkText?: string;
+  watermarkType?: string;
+  extensions?: string;
+}
+
+export function updateDocControl(docId: string, data: UpdateDocControlParams) {
+  return request.put<any, DocControl>(`/api/doc/${docId}/control`, data);
+}
+
