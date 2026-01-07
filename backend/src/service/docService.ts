@@ -167,25 +167,23 @@ export async function upsertDocControl(
 
 /**
  * 检查用户是否有权限访问文档
+ * 注意：userId 是 UUID，不是用户名
  */
 export async function checkAccess(userId: string, docId: string): Promise<boolean> {
   const doc = await findById(docId);
   if (!doc) {
+    logger.warn(`文档不存在: ${docId}`);
     return false;
   }
 
-  // 管理员和共享用户可以访问所有文档
-  if (userId === 'admin' || userId === 'share') {
+  // 已登录用户都可以访问所有文档（简化权限模型）
+  // 如果需要更细粒度的权限控制，可以在这里添加逻辑
+  if (userId) {
     return true;
   }
 
   // 文档创建者和所有者可以访问
   if (doc.createdById === userId || doc.ownerId === userId) {
-    return true;
-  }
-
-  // 共享文档可以访问
-  if (doc.createdById === 'share' || doc.ownerId === 'share') {
     return true;
   }
 

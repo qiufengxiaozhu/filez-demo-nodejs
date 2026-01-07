@@ -1,5 +1,14 @@
 import config from 'config';
 
+// 辅助函数：将字符串转换为布尔值
+function toBoolean(value: any): boolean {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    return value.toLowerCase() === 'true' || value === '1';
+  }
+  return Boolean(value);
+}
+
 // 导出类型化的配置
 export interface ServerConfig {
   port: number;
@@ -64,6 +73,9 @@ export interface AppConfig {
   admin: AdminConfig;
 }
 
+// 获取原始配置
+const rawZoffice = config.get<any>('zoffice');
+
 // 导出配置对象
 export const appConfig: AppConfig = {
   server: config.get('server'),
@@ -71,7 +83,16 @@ export const appConfig: AppConfig = {
   jwt: config.get('jwt'),
   session: config.get('session'),
   upload: config.get('upload'),
-  zoffice: config.get('zoffice'),
+  zoffice: {
+    ...rawZoffice,
+    cors: toBoolean(rawZoffice.cors),
+    app: {
+      ...rawZoffice.app,
+      feIntegration: {
+        enable: toBoolean(rawZoffice.app?.feIntegration?.enable),
+      },
+    },
+  },
   demo: config.get('demo'),
   admin: config.get('admin'),
 };

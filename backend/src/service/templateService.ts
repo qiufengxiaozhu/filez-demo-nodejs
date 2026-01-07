@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../util/logger';
 
-// 模板目录
-const TEMPLATE_DIR = path.join(__dirname, '../../templates');
+// 模板目录 - 使用进程工作目录，兼容开发和生产环境
+const TEMPLATE_DIR = path.join(process.cwd(), 'templates');
 
 // 文档类型到模板文件的映射
 const TEMPLATE_FILES: Record<string, string> = {

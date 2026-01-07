@@ -28,9 +28,10 @@ export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
       token = ctx.cookies.get(config.demo.tokenName);
     }
 
-    // 从 query 中获取 token
-    if (!token && ctx.query.token) {
-      token = ctx.query.token as string;
+    // 从 query 中获取 token（支持多种参数名）
+    if (!token) {
+      // 优先使用配置的 tokenName，也支持通用的 token 参数
+      token = (ctx.query[config.demo.tokenName] || ctx.query.token) as string | undefined;
     }
 
     if (!token) {

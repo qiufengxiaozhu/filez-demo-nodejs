@@ -1,5 +1,4 @@
 import { Context } from 'koa';
-import config from 'config';
 import * as docService from '../service/docService';
 import * as userService from '../service/userService';
 import { success, error, forbidden, notFound } from '../util/response';
@@ -32,31 +31,9 @@ function getTokenFromRequest(ctx: Context): string | undefined {
   return undefined;
 }
 
-// ZOffice 配置
-interface ZOfficeConfig {
-  schema: string;
-  host: string;
-  port: number;
-  context: string;
-  cors: boolean;
-  app: {
-    secret: string;
-    feIntegration: {
-      enable: boolean;
-    };
-  };
-}
-
-// Demo 配置
-interface DemoConfig {
-  host: string;
-  context: string;
-  repoId: string;
-  tokenName: string;
-}
-
-const zofficeConfig: ZOfficeConfig = config.get<ZOfficeConfig>('zoffice');
-const demoConfig: DemoConfig = config.get<DemoConfig>('demo');
+// 使用 appConfig 中已处理好的配置（布尔值已正确转换）
+const zofficeConfig = appConfig.zoffice;
+const demoConfig = appConfig.demo;
 
 /**
  * 用户 Profile 结构
@@ -176,7 +153,7 @@ export async function getDriverCbUrl(ctx: Context): Promise<void> {
   }
 
   // 3. 文档下载/上传地址
-  const serverPort = config.get<number>('server.port');
+  const serverPort = appConfig.server.port;
   const downloadOrUploadUrl = `http://${demoConfig.host}:${serverPort}${demoConfig.context}/${docId}/content`;
   params.append('downloadUrl', downloadOrUploadUrl);
   params.append('uploadUrl', downloadOrUploadUrl);
@@ -579,7 +556,7 @@ export async function compareDoc(ctx: Context): Promise<void> {
   }
 
   // 3. 下载地址
-  const serverPort = config.get<number>('server.port');
+  const serverPort = appConfig.server.port;
   const downloadUrlA = `http://${demoConfig.host}:${serverPort}${demoConfig.context}/${docAid}/content`;
   const downloadUrlB = `http://${demoConfig.host}:${serverPort}${demoConfig.context}/${docBid}/content`;
   params.append('downloadUrl', downloadUrlA);
