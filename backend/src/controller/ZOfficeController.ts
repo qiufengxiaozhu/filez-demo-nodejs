@@ -1,7 +1,7 @@
 import { Context } from 'koa';
 import * as docService from '../service/docService';
 import * as userService from '../service/userService';
-import { success, error, forbidden, notFound } from '../util/response';
+import { error, forbidden, notFound, success } from '../util/response';
 import { logger } from '../util/logger';
 import { hmacSign } from '../util/hmac';
 import { appConfig } from '../config/AppConfig';
@@ -250,7 +250,8 @@ export async function publishDoc(ctx: Context): Promise<void> {
   const userId = ctx.user?.userId;
 
   if (!userId) {
-    forbidden(ctx, '未登录');
+    ctx.status = 403;
+    ctx.body = null;
     return;
   }
 
@@ -258,38 +259,50 @@ export async function publishDoc(ctx: Context): Promise<void> {
   const hasAccess = await docService.checkAccess(userId, docId);
   if (!hasAccess) {
     logger.error(`用户 ${userId} 无权访问文件 ${docId}`);
-    forbidden(ctx, '无权修改该文件');
+    ctx.status = 403;
+    ctx.body = null;
     return;
   }
 
   const docMeta = await docService.findById(docId);
   if (!docMeta) {
-    notFound(ctx, '文档不存在');
+    ctx.status = 404;
+    ctx.body = null;
     return;
   }
 
   // 获取上传的文件
   const file = (ctx.request as any).file;
   if (!file) {
-    success(ctx, docMeta);
+    // 没有文件时，返回当前文档元数据（ZOffice 格式）
+    ctx.status = 200;
+    ctx.body = docMetaToZOfficeFormat(docMeta);
     return;
   }
 
-  const { buffer, size } = file;
-  const newDocMeta = await docService.uploadFile(docId, buffer, size);
+  try {
+    const { buffer, size } = file;
+    const newDocMeta = await docService.uploadFile(docId, buffer, size);
 
-  if (newDocMeta && newDocMeta.modifiedAt && docMeta.modifiedAt) {
-    const oldTime = new Date(docMeta.modifiedAt).getTime();
-    const newTime = new Date(newDocMeta.modifiedAt).getTime();
-    if (oldTime < newTime) {
-      logger.info(`文件上传成功，保存时间：${newDocMeta.modifiedAt}`);
-      success(ctx, newDocMeta);
-      return;
+    if (newDocMeta && newDocMeta.modifiedAt && docMeta.modifiedAt) {
+      const oldTime = new Date(docMeta.modifiedAt).getTime();
+      const newTime = new Date(newDocMeta.modifiedAt).getTime();
+      if (oldTime < newTime) {
+        logger.info(`文件上传成功，保存时间：${newDocMeta.modifiedAt}`);
+        // 上传成功，返回新的文档元数据（ZOffice 格式）
+        ctx.status = 200;
+        ctx.body = docMetaToZOfficeFormat(newDocMeta);
+        return;
+      }
     }
+    logger.info('文件保存失败');
+  } catch (e) {
+    logger.error('上传文件失败', e);
   }
 
-  logger.info('文件保存失败');
-  success(ctx, docMeta);
+  // 上传失败，返回原文档元数据（ZOffice 格式）
+  ctx.status = 200;
+  ctx.body = docMetaToZOfficeFormat(docMeta);
 }
 
 /**
@@ -320,6 +333,27 @@ function userToZOfficeProfile(user: any): any {
     job_title: user.jobTitle || '',
     org_name: user.orgName || '',
     org_id: user.orgId || '',
+  };
+}
+
+/**
+ * 将 DocMeta 转换为 ZOffice 需要的格式（下划线命名）
+ * 用于 publishDoc 接口返回
+ */
+function docMetaToZOfficeFormat(docMeta: any): any {
+  return {
+    id: docMeta.id,
+    name: docMeta.name,
+    size: docMeta.size,
+    version: String(docMeta.version || '1'),
+    filepath: docMeta.path || '',
+    // 时间字段（必须为 ISO 8601 UTC 格式）
+    created_at: formatDateToUtc(docMeta.createdAt),
+    modified_at: formatDateToUtc(docMeta.modifiedAt || docMeta.updatedAt),
+    // 用户信息
+    created_by: userToZOfficeProfile(docMeta.createdBy),
+    modified_by: userToZOfficeProfile(docMeta.createdBy),
+    owner: userToZOfficeProfile(docMeta.owner),
   };
 }
 
