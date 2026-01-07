@@ -6,6 +6,11 @@
   "database": {
     "url": "file:./data/filez_demo.db"
   },
+  "log": {
+    "dir": "./logs",
+    "level": "info",
+    "maxFiles": "30d"
+  },
   "jwt": {
     "secret": "filez-demo-secret-key",
     "expiresIn": "7d"
@@ -41,6 +46,6 @@
   "admin": {
     "username": "admin",
     "password": "zOffice",
-    "email": "admin@lenovo_zOffice.com"
+    "email": "admin@lenovozOffice.com"
   }
 }

@@ -37,12 +37,13 @@ COPY --from=frontend-builder /app/frontend/dist ./public
 COPY backend/docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 
-# 创建数据目录
-RUN mkdir -p data uploads
+# 创建数据目录和日志目录
+RUN mkdir -p data uploads logs
 
 # 环境变量
 ENV NODE_ENV=production
 ENV PORT=8000
+ENV LOG_DIR=/app/logs
 
 EXPOSE 8000
 

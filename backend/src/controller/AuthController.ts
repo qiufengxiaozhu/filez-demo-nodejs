@@ -11,7 +11,11 @@ import { logger } from '../util/logger';
 export async function login(ctx: Context): Promise<void> {
   const { username, password } = ctx.request.body as any;
 
+  // 调试日志
+  logger.debug(`登录请求 - username: ${username}, password: ${password ? '***' : 'empty'}`);
+
   if (!username || !password) {
+    logger.warn(`登录失败: 用户名或密码为空 - username: ${username}`);
     error(ctx, '用户名和密码不能为空');
     return;
   }
@@ -19,6 +23,7 @@ export async function login(ctx: Context): Promise<void> {
   // 验证用户
   const user = await userService.validateUser(username, password);
   if (!user) {
+    logger.warn(`登录失败: 用户名或密码错误 - username: ${username}`);
     unauthorized(ctx, '用户名或密码错误');
     return;
   }

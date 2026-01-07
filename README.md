@@ -31,6 +31,12 @@ docker compose down
 
 # 重新构建
 docker compose up -d --build --force-recreate
+
+# 停止并重启
+docker compose down && docker compose up -d
+
+# 进入容器
+docker exec -it filez-demo-nodejs sh
 ```
 
 访问: http://localhost:8000
